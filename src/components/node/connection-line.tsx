@@ -53,7 +53,7 @@ export default function NodeConnectionLine({
             x2={endX}
             y2={endY}
             stroke={isSelected ? "#000" : "#eee"}
-            strokeWidth={2}
+            strokeWidth={1}
             markerEnd="url(#arrowhead)"
             pointerEvents="stroke"
             onClick={(e) => {

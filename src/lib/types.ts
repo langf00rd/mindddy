@@ -59,4 +59,8 @@ export interface NodeItemProps {
   renderNodeContent: (node: Node) => React.ReactNode;
   startConnection: (e: React.MouseEvent, nodeId: number) => void;
   endConnection: (e: React.MouseEvent, nodeId: number) => void;
+  connectionsCount: {
+    in: number;
+    out: number;
+  };
 }

@@ -338,6 +338,12 @@ export default function AppCanvas() {
     e.target.value = ""; // reset input so you can re-import same file
   }
 
+  function getConnectionCounts(nodeId: number) {
+    const incoming = connections.filter((c) => c.to === nodeId).length;
+    const outgoing = connections.filter((c) => c.from === nodeId).length;
+    return { incoming, outgoing };
+  }
+
   return (
     <div className="w-full h-screen flex flex-col select-none">
       {/*---- toolbar ----*/}
@@ -346,17 +352,19 @@ export default function AppCanvas() {
           <Button
             variant="outline"
             onClick={() => {
-              exportCanvas();
-              window.location.reload();
+              const shouldReload = window.confirm(
+                "Remember to export else you'll lose all progress! Continue?",
+              );
+              if (shouldReload) window.location.reload();
             }}
           >
             <PlusIcon /> New page
           </Button>
           <Button variant="outline" onClick={handleImportClick}>
-            <Upload /> Import
+            <Download /> Import
           </Button>
           <Button variant="outline" onClick={exportCanvas}>
-            <Download /> Export
+            <Upload /> Export
           </Button>
         </div>
         <div className="space-x-2">
@@ -415,18 +423,25 @@ export default function AppCanvas() {
         />
 
         {/* ---- nodes ---- */}
-        {nodes.map((node, index) => (
-          <NodeItem
-            key={index}
-            node={node}
-            handleMouseDown={handleMouseDown}
-            deleteNode={deleteNode}
-            handleMediaUpload={handleMediaUpload}
-            renderNodeContent={renderNodeContent}
-            startConnection={startConnection}
-            endConnection={endConnection}
-          />
-        ))}
+        {nodes.map((node, index) => {
+          const counts = getConnectionCounts(node.id);
+          return (
+            <NodeItem
+              key={index}
+              node={node}
+              handleMouseDown={handleMouseDown}
+              deleteNode={deleteNode}
+              handleMediaUpload={handleMediaUpload}
+              renderNodeContent={renderNodeContent}
+              startConnection={startConnection}
+              endConnection={endConnection}
+              connectionsCount={{
+                in: counts.incoming,
+                out: counts.outgoing,
+              }}
+            />
+          );
+        })}
       </div>
 
       <input
