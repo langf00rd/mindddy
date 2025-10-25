@@ -37,10 +37,26 @@ export default function AppCanvas() {
   const [tempLine, setTempLine] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const [selectedConnection, setSelectedConnection] = useState<string | null>(
+    null,
+  );
 
   // trigger file import selection
   function handleImportClick() {
     importFileRef.current?.click();
+  }
+
+  // deselect selected connection line when clicking on empty canvas
+  function handleCanvasClick() {
+    setSelectedConnection(null);
+  }
+
+  // delete selected connection line
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Delete" || (e.key === "Backspace" && selectedConnection)) {
+      setConnections((prev) => prev.filter((c) => c.id !== selectedConnection));
+      setSelectedConnection(null);
+    }
   }
 
   function createNode(type: Node["type"]) {
@@ -147,7 +163,7 @@ export default function AppCanvas() {
     if (!file || selectedNodeForMedia === null) return;
     const reader = new FileReader();
     if (mediaType === "image") {
-      // xonvert image to base64
+      // convert image to base64
       reader.onload = () => {
         const base64 = reader.result as string;
         setNodes((prev) =>
@@ -325,61 +341,67 @@ export default function AppCanvas() {
   return (
     <div className="w-full h-screen flex flex-col select-none">
       {/*---- toolbar ----*/}
-      <div className="p-2 flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() => {
-            exportCanvas();
-            window.location.reload();
-          }}
-        >
-          <PlusIcon /> New page
-        </Button>
-        <Button variant="outline" onClick={handleImportClick}>
-          <Upload /> Import
-        </Button>
-        <Button variant="outline" onClick={exportCanvas}>
-          <Download /> Export
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => createNode("text")}
-        >
-          <Type />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => createNode("image")}
-        >
-          <ImageIcon />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => createNode("audio")}
-        >
-          <Music />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => createNode("video")}
-        >
-          <Video />
-        </Button>
-        <Button variant="outline" size="icon" onClick={clearAll}>
-          <Trash2 />
-        </Button>
+      <div className="p-2 flex justify-between sticky top-0">
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              exportCanvas();
+              window.location.reload();
+            }}
+          >
+            <PlusIcon /> New page
+          </Button>
+          <Button variant="outline" onClick={handleImportClick}>
+            <Upload /> Import
+          </Button>
+          <Button variant="outline" onClick={exportCanvas}>
+            <Download /> Export
+          </Button>
+        </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => createNode("text")}
+          >
+            <Type />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => createNode("image")}
+          >
+            <ImageIcon />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => createNode("audio")}
+          >
+            <Music />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => createNode("video")}
+          >
+            <Video />
+          </Button>
+          <Button variant="outline" size="icon" onClick={clearAll}>
+            <Trash2 />
+          </Button>
+        </div>
       </div>
 
       <div
         ref={canvasRef}
-        className="flex-1 relative overflow-hidden"
+        className="flex-1 relative overflow-hidden outline-0"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onClick={handleCanvasClick}
+        tabIndex={0} // make div focusable for keyboard events
+        onKeyDown={handleKeyDown}
       >
         {/* ---- node connections ---*/}
         <NodeConnectionLine
@@ -388,6 +410,8 @@ export default function AppCanvas() {
           connectingFrom={connectingFrom}
           tempLine={tempLine}
           getNodeCenter={getNodeCenter}
+          selectedConnection={selectedConnection}
+          onSelectConnection={setSelectedConnection}
         />
 
         {/* ---- nodes ---- */}

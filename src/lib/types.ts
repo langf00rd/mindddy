@@ -47,6 +47,8 @@ export interface NodeConnectionLineProps {
   connectingFrom: number | null;
   tempLine: { x: number; y: number } | null;
   getNodeCenter: (node: Node) => { x: number; y: number };
+  selectedConnection?: string | null;
+  onSelectConnection?: (id: string) => void;
 }
 
 export interface NodeItemProps {

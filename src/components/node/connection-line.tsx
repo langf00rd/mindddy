@@ -1,9 +1,19 @@
 import { NodeConnectionLineProps } from "@/lib/types";
 
-export default function NodeConnectionLine(props: NodeConnectionLineProps) {
-  const { nodes, connections, connectingFrom, tempLine, getNodeCenter } = props;
+export default function NodeConnectionLine({
+  nodes,
+  connections,
+  connectingFrom,
+  tempLine,
+  getNodeCenter,
+  selectedConnection,
+  onSelectConnection,
+}: NodeConnectionLineProps) {
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+    <svg
+      className="absolute inset-0 w-full h-full cursor-pointer"
+      style={{ pointerEvents: "auto" }}
+    >
       <defs>
         <marker
           id="arrowhead"
@@ -14,7 +24,7 @@ export default function NodeConnectionLine(props: NodeConnectionLineProps) {
           orient="auto"
           markerUnits="strokeWidth"
         >
-          <polygon points="0 0, 10 3, 0 6" fill="#ccc" />
+          <polygon points="0 0, 10 3, 0 6" fill="#eee" />
         </marker>
       </defs>
 
@@ -22,25 +32,34 @@ export default function NodeConnectionLine(props: NodeConnectionLineProps) {
         const from = nodes.find((n) => n.id === conn.from);
         const to = nodes.find((n) => n.id === conn.to);
         if (!from || !to) return null;
+
         const start = getNodeCenter(from);
         const end = getNodeCenter(to);
-        // shorten line so arrow doesn't overlap node
+
         const dx = end.x - start.x;
         const dy = end.y - start.y;
         const length = Math.sqrt(dx * dx + dy * dy);
         const shorten = 10;
         const endX = end.x - (dx / length) * shorten;
         const endY = end.y - (dy / length) * shorten;
+
+        const isSelected = selectedConnection === conn.id;
+
         return (
           <line
             key={conn.id}
             x1={start.x}
             y1={start.y}
-            x2={endX - 100}
-            y2={endY - 100}
-            stroke="#ccc"
-            strokeWidth={1}
+            x2={endX}
+            y2={endY}
+            stroke={isSelected ? "#000" : "#eee"}
+            strokeWidth={2}
             markerEnd="url(#arrowhead)"
+            pointerEvents="stroke"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectConnection?.(conn.id);
+            }}
           />
         );
       })}
@@ -57,7 +76,7 @@ export default function NodeConnectionLine(props: NodeConnectionLineProps) {
               y1={start.y}
               x2={tempLine.x}
               y2={tempLine.y}
-              stroke="#ccc"
+              stroke="#000"
               strokeWidth={1}
               strokeDasharray="5,5"
               markerEnd="url(#arrowhead)"

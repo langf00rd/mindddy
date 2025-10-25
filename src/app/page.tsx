@@ -1,5 +1,3 @@
-"use client";
-
 import AppCanvas from "@/components/canvas";
 
 export default function Home() {
